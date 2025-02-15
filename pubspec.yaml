@@ -40,6 +40,10 @@ dependencies:
   get_storage: ^2.1.1
   fluttertoast: ^8.2.10
   intl: ^0.20.1
+  image_picker: ^1.1.2
+  webview_flutter: ^4.10.0
+  url_launcher: ^6.3.1
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:

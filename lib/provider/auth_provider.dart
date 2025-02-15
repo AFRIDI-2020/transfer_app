@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:transfer/models/login_response.dart';
@@ -10,6 +11,9 @@ import 'package:transfer/utils/local_storage.dart';
 class AuthProvider extends ChangeNotifier {
   LoginResponse? _loginResponse;
   final LocalStorage _localStorage = LocalStorage();
+
+  LoginResponse? get loginResponse => _loginResponse;
+  Original? userInfo;
 
   Future<http.Response?> getLogin(
       {required String email, required String password}) async {
@@ -24,6 +28,28 @@ class AuthProvider extends ChangeNotifier {
         _localStorage.setToken(token);
       }
       notifyListeners();
+
+      return response;
+    } catch (e) {
+      log("Login error - $e");
+      return null;
+    }
+  }
+
+  Future<http.Response?> registerUser({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    try {
+      http.Response response =
+          await http.post(Uri.parse(baseUrl + registerEp), body: {
+        "name": name,
+        "email": email,
+        "password": password,
+        "password_confirmation": password,
+        "remember": "on"
+      });
 
       return response;
     } catch (e) {
@@ -50,6 +76,52 @@ class AuthProvider extends ChangeNotifier {
       return response;
     } catch (e) {
       log("Login error - $e");
+      return null;
+    }
+  }
+
+  Future<http.Response?> getCurrentUserInfo() async {
+    try {
+      String token = _localStorage.token;
+      http.Response response = await http.get(
+        Uri.parse(baseUrl + userEp),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        userInfo = Original.fromJson(jsonDecode(response.body));
+        if (kDebugMode) {
+          log("Current user: ${userInfo.toString()}");
+        }
+      }
+
+      if (response.statusCode == 401) {
+        _localStorage.removeSession();
+      }
+      notifyListeners();
+      return response;
+    } catch (e) {
+      log("Getting user info error - $e");
+      return null;
+    }
+  }
+
+  Future<http.Response?> sendForgotPasswordRequest(
+      {required String email}) async {
+    try {
+      http.Response response = await http.post(
+        Uri.parse(baseUrl + forgotPasswordEp),
+        body: {
+          "email": email,
+        },
+      );
+      // if(kDebugMode) {
+      //   log(jsonDecode(response.body));
+      // }
+      return response;
+    } catch (e) {
+      log("sending forgot password info error - $e");
       return null;
     }
   }

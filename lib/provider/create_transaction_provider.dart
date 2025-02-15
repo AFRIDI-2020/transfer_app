@@ -5,11 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:transfer/models/receiver.dart';
 import 'package:transfer/models/transaction_create_info.dart';
 import 'package:http/http.dart' as http;
+import 'package:transfer/provider/auth_provider.dart';
 import '../models/payment_request.dart';
 import '../utils/constant_strings.dart';
 import '../utils/local_storage.dart';
 
 class CreateTransactionProvider extends ChangeNotifier {
+  final AuthProvider authProvider;
+
+  CreateTransactionProvider({required this.authProvider});
   final LocalStorage _localStorage = LocalStorage();
 
   TransactionCreateInfo? _transactionCreateInfo;
@@ -117,5 +121,17 @@ class CreateTransactionProvider extends ChangeNotifier {
     _transactionTime = null;
 
     notifyListeners();
+  }
+
+  bool didUserRequiredVerification() {
+    if(_transactionCreateInfo?.verification?.status == 0) {
+      return false;
+    } else {
+      if(authProvider.loginResponse?.user?.original?.approve == 0) {
+        return true;
+      } else {
+        return false;
+      }
+    }
   }
 }

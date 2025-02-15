@@ -9,6 +9,7 @@ import 'package:transfer/provider/create_transaction_provider.dart';
 import 'package:transfer/provider/page_controll_provider.dart';
 import 'package:transfer/provider/transaction_history_provider.dart';
 import 'package:transfer/utils/app_colors.dart';
+import 'package:transfer/utils/extensions/verificaiton_check_extension.dart';
 import 'package:transfer/utils/select_date.dart';
 import 'package:transfer/utils/select_time.dart';
 import 'package:transfer/utils/toast.dart';
@@ -54,6 +55,43 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     setState(() {
       _loading = false;
     });
+    if (mounted) {
+      if (createTransactionProvider.didUserRequiredVerification()) {
+        _showVerificationDialog(createTransactionProvider);
+      }
+    }
+  }
+
+  void _showVerificationDialog(
+      CreateTransactionProvider createTransactionProvider) {
+    final theme = Theme.of(context);
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) {
+          return PopScope(
+            canPop: false,
+            child: AlertDialog(
+              title: Text(
+                (createTransactionProvider.transactionCreateInfo?.verification?.status ?? 0).verificationText(),
+              ),
+              content: Text(
+                createTransactionProvider.transactionCreateInfo?.verification?.message ?? "fdf",
+                style: theme.textTheme.bodyMedium,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    final pageControlProvider = Provider.of<PageControllerProvider>(context, listen: false);
+                    Navigator.pop(context);
+                    pageControlProvider.setCurrentIndex(2);
+                  },
+                  child: Text("Go to Profile",style: theme.textTheme.titleMedium?.copyWith(color: AppColors.primaryColor),),
+                ),
+              ],
+            ),
+          );
+        });
   }
 
   @override
@@ -170,7 +208,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                               return "Enter your ${createTransactionProvider.selectedSendingMethod?.method ?? ""} Number";
                             }
 
-                            if(value.length != 11) {
+                            if (value.length != 11) {
                               return "The sender number must be of 11 digits";
                             }
 
@@ -274,7 +312,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                               return "Enter your ${createTransactionProvider.selectedReceivingMethod?.method ?? ""} Number";
                             }
 
-                            if(value.length != 11) {
+                            if (value.length != 11) {
                               return "The receiver number must be of 11 digits";
                             }
 
@@ -614,7 +652,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                               shape: WidgetStateProperty.all(
                                   RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8)))),
-                          child: ButtonChild(text: "Submit", loading: _btnLoading,),
+                          child: ButtonChild(
+                            text: "Submit",
+                            loading: _btnLoading,
+                          ),
                         ),
                       ),
                     ],

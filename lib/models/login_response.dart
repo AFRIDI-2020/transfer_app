@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:transfer/utils/constant_strings.dart';
+
 LoginResponse loginResponseFromJson(String str) => LoginResponse.fromJson(json.decode(str));
 
 String loginResponseToJson(LoginResponse data) => json.encode(data.toJson());
@@ -170,9 +172,9 @@ class Original {
     name: json["name"],
     email: json["email"],
     emailVerifiedAt: json["email_verified_at"],
-    front: json["front"],
-    back: json["back"],
-    own: json["own"],
+    front: json["front"] == null? null : "$imageUrl${json["front"]}",
+    back: json["back"] == null? null : "$imageUrl${json["back"]}",
+    own: json["own"] == null? null : "$imageUrl${json["own"]}",
     approve: json["approve"],
     accept: json["accept"],
     status: json["status"],
@@ -194,4 +196,9 @@ class Original {
     "created_at": createdAt?.toIso8601String(),
     "updated_at": updatedAt?.toIso8601String(),
   };
+
+  @override
+  String toString() {
+    return 'Original{id: $id, name: $name, email: $email, emailVerifiedAt: $emailVerifiedAt, front: $front, back: $back, own: $own, approve: $approve, accept: $accept, status: $status, createdAt: $createdAt, updatedAt: $updatedAt}';
+  }
 }
