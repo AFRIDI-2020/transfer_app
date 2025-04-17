@@ -673,8 +673,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       if (sendingAmount >= 500) {
         return createTransactionProvider
             .receivingAmount(sendingAmount: sendingAmount)
-            .round()
-            .toString();
+            .toStringAsFixed(1);
       } else {
         return "";
       }

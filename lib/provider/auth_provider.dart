@@ -36,6 +36,27 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<http.Response?> getRefreshToken() async {
+    try {
+      http.Response response =
+          await http.post(Uri.parse(baseUrl + refreshTokenEp), body: {
+        "token": "Bearer ${_localStorage.token}",
+      });
+
+      if (response.statusCode == 200) {
+        Token token = Token.fromJson(jsonDecode(response.body)["data"]);
+        String accessToken = token.accessToken ?? "";
+        _localStorage.setToken(accessToken);
+      }
+      notifyListeners();
+
+      return response;
+    } catch (e) {
+      log("refresh token error - $e");
+      return null;
+    }
+  }
+
   Future<http.Response?> registerUser({
     required String name,
     required String email,
@@ -97,7 +118,12 @@ class AuthProvider extends ChangeNotifier {
       }
 
       if (response.statusCode == 401) {
-        _localStorage.removeSession();
+        var result = await getRefreshToken();
+        if (result?.statusCode == 200) {
+          await getCurrentUserInfo();
+        } else {
+          _localStorage.removeSession();
+        }
       }
       notifyListeners();
       return response;
@@ -116,9 +142,6 @@ class AuthProvider extends ChangeNotifier {
           "email": email,
         },
       );
-      // if(kDebugMode) {
-      //   log(jsonDecode(response.body));
-      // }
       return response;
     } catch (e) {
       log("sending forgot password info error - $e");

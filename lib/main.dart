@@ -23,8 +23,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => TransactionHistoryProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProxyProvider<AuthProvider, TransactionHistoryProvider>(
+          create: (context) => TransactionHistoryProvider(
+            authProvider: context.read<AuthProvider>(),
+          ),
+          update: (context, value, previous) => previous!,
+        ),
         ChangeNotifierProxyProvider<AuthProvider, CreateTransactionProvider>(
           create: (context) => CreateTransactionProvider(
             authProvider: context.read<AuthProvider>(),
@@ -35,7 +40,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => NidVerificationProvider()),
       ],
       child: MaterialApp(
-        title: 'Flutter Demo',
+        title: 'RTransfer',
         debugShowCheckedModeBanner: false,
         theme: lightThemeData,
         home: const SplashScreen(),

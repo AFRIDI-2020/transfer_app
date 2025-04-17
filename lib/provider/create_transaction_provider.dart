@@ -66,6 +66,15 @@ class CreateTransactionProvider extends ChangeNotifier {
         var data = jsonDecode(response.body)["data"];
         _transactionCreateInfo = TransactionCreateInfo.fromJson(data);
       }
+
+      if (response.statusCode == 401) {
+        var result = await authProvider.getRefreshToken();
+        if (result?.statusCode == 200) {
+          await getTransactionCreateInfo();
+        } else {
+          _localStorage.removeSession();
+        }
+      }
       notifyListeners();
 
       return response;
@@ -105,8 +114,16 @@ class CreateTransactionProvider extends ChangeNotifier {
         _transactionDate = null;
         _transactionTime = null;
       }
-      notifyListeners();
 
+      if (response.statusCode == 401) {
+        var result = await authProvider.getRefreshToken();
+        if (result?.statusCode == 200) {
+          await createTransaction(paymentRequest: paymentRequest);
+        } else {
+          _localStorage.removeSession();
+        }
+      }
+      notifyListeners();
       return response;
     } catch (e, s) {
       log("transaction create info error - $e, stack trace - $s");

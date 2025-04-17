@@ -1,6 +1,7 @@
 const String baseUrl = "https://transfer.rajtechteam.com/api/";
 const String termsConditionUrl = "https://transfer.rajtechteam.com/terms-and-conditions";
 const String loginEp = "login";
+const String refreshTokenEp = "refresh";
 const String registerEp = "register";
 const String transactionListEp = "transection_list";
 const String changePasswordEp = "password-change";
